@@ -1,0 +1,63 @@
+/* Custom styling for Home Tutor Finding System */
+
+body {
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+.btn-primary:hover {
+    background-color: #2e59d9;
+    border-color: #2653d4;
+}
+
+.tutor-avatar {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #e3e6f0;
+}
+
+.badge-status-pending {
+    background-color: #f6c23e;
+    color: #fff;
+}
+.badge-status-accepted {
+    background-color: #1cc88a;
+    color: #fff;
+}
+.badge-status-rejected {
+    background-color: #e74a3b;
+    color: #fff;
+}
+
+/* Dashboard summary cards */
+.summary-card .icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+}
