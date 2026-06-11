@@ -1,45 +1,51 @@
-📖 Overview
+EduConnect - Home Tutor Finding Platform
 
-In Bangladesh, finding reliable home tutors often depends on word-of-mouth recommendations or costly tuition media agencies. EduConnect Platform solves this problem by providing a centralized online marketplace where students, parents, and tutors can connect directly.
+A web-based platform that connects students and parents with qualified home tutors through a secure, transparent, and efficient marketplace.
 
-The platform offers secure role-based access control with dedicated dashboards for Students/Parents, Tutors, and Administrators, ensuring a transparent and efficient tutor hiring process.
+Overview
 
-🎯 Objectives
-Develop an online platform for finding home tutors.
-Simplify communication between students and tutors.
-Provide role-based access for Admin, Tutor, and Student.
-Implement a real-world CRUD-based web application using PHP and MySQL.
-Create a transparent and secure tutor hiring environment.
-✨ Features
-👨‍🎓 Student / Parent Dashboard
-User Registration & Login
+EduConnect is a full-stack web application designed to simplify the process of finding and hiring home tutors. The platform eliminates the need for unreliable word-of-mouth referrals and costly third-party tuition agencies by providing a centralized system where students, parents, and tutors can connect directly.
+
+The system implements role-based access control and offers dedicated dashboards for Students/Parents, Tutors, and Administrators.
+
+Problem Statement
+
+Finding qualified tutors in Bangladesh often involves:
+
+Unverified tutor information
+Dependence on social networks and referrals
+High commission fees charged by tuition agencies
+Lack of transparency in the hiring process
+Difficulty managing tutoring requests
+
+EduConnect addresses these challenges by creating a digital marketplace that facilitates direct communication between tutors and learners.
+
+Key Features
+Student / Parent Module
+User Registration & Authentication
 Profile Management
 Search Tutors by:
 Subject
 Location
 Budget
+View Tutor Profiles
 Send Tuition Requests
-View Request History
-Track Request Status:
-Pending
-Accepted
-Rejected
-👨‍🏫 Tutor Dashboard
-Create Professional Tutor Profile
-Add:
-Academic Background
-Teaching Subjects
-Experience
-Expected Salary
-Availability
-Manage Incoming Requests
-Accept or Reject Tuition Offers
-Update Tutor Information
-👨‍💼 Admin Panel
+Track Request Status
+Manage Request History
+Tutor Module
+Tutor Registration & Authentication
+Professional Profile Creation
+Add Academic Qualifications
+Manage Teaching Subjects
+Set Expected Salary
+Specify Preferred Teaching Locations
+Manage Availability
+Accept/Reject Tuition Requests
+Admin Module
 Dashboard Analytics
-Manage Students and Tutors
-Verify User Accounts
-Update User Information
-Suspend/Delete Accounts
-Monitor Platform Activity
-Manage Reports and Conflicts
+User Management
+Tutor Verification
+Content Moderation
+Account Suspension & Deletion
+Platform Activity Monitoring
+System Oversight
