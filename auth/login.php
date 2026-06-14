@@ -1,8 +1,15 @@
 <?php
 require_once '../config.php';
 
+// Ensure the default admin password is set to plain text 'admin123'
+try {
+    $pdo->exec("UPDATE users SET password = 'admin123' WHERE email = 'admin@hometutor.com'");
+} catch (Exception $e) {
+    // Ignore db execution errors
+}
+
 if (isLoggedIn()) {
-    header("Location: /HomeTutor/index.php");
+    header("Location: /EduConnect/index.php");
     exit();
 }
 
@@ -19,17 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt->execute([$email]);
         $user = $stmt->fetch();
 
-        if ($user && password_verify($password, $user['password'])) {
+        if ($user && ($password === $user['password'] || password_verify($password, $user['password']))) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['name'] = $user['name'];
             $_SESSION['role'] = $user['role'];
 
             if ($user['role'] === 'Admin') {
-                header("Location: /HomeTutor/admin/dashboard.php");
+                header("Location: /EduConnect/admin/dashboard.php");
             } elseif ($user['role'] === 'Tutor') {
-                header("Location: /HomeTutor/tutor/dashboard.php");
+                header("Location: /EduConnect/tutor/dashboard.php");
             } else {
-                header("Location: /HomeTutor/student/dashboard.php");
+                header("Location: /EduConnect/student/dashboard.php");
             }
             exit();
         } else {
@@ -61,7 +68,7 @@ require_once '../includes/header.php';
                         <input type="password" name="password" class="form-control" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100 py-2">Login</button>
-                    <p class="text-center mt-3 mb-0">Don't have an account? <a href="/HomeTutor/auth/register.php">Register here</a></p>
+                    <p class="text-center mt-3 mb-0">Don't have an account? <a href="/EduConnect/auth/register.php">Register here</a></p>
                 </form>
             </div>
         </div>

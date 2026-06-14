@@ -3,7 +3,7 @@ require_once 'config.php';
 
 // Fetch a few available tutors to show on the landing page
 $stmt = $pdo->query("
-    SELECT u.id as user_id, u.name, tp.subject, tp.location 
+    SELECT u.id as user_id, u.name, tp.subject, tp.location, tp.picture
     FROM users u
     JOIN tutor_profile tp ON u.id = tp.user_id
     WHERE u.role = 'Tutor' AND tp.availability = 'Available'
@@ -19,13 +19,13 @@ require_once 'includes/header.php';
         <h1 class="display-4 fw-bold mb-3">Find the Best Home Tutors Near You</h1>
         <p class="lead text-muted mb-4">Connect with experienced tutors in your area to achieve your academic goals. Simple, fast, and reliable.</p>
         <?php if(!isLoggedIn()): ?>
-            <a href="/HomeTutor/auth/register.php" class="btn btn-primary btn-lg px-4 me-2">Get Started</a>
-            <a href="/HomeTutor/auth/login.php" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+            <a href="/EduConnect/auth/register.php" class="btn btn-primary btn-lg px-4 me-2">Get Started</a>
+            <a href="/EduConnect/auth/login.php" class="btn btn-outline-secondary btn-lg px-4">Login</a>
         <?php else: ?>
             <?php if($_SESSION['role'] === 'Student'): ?>
-                <a href="/HomeTutor/student/dashboard.php" class="btn btn-primary btn-lg px-4">Find Tutors Now</a>
+                <a href="/EduConnect/student/dashboard.php" class="btn btn-primary btn-lg px-4">Find Tutors Now</a>
             <?php else: ?>
-                <a href="/HomeTutor/<?= strtolower($_SESSION['role']) ?>/dashboard.php" class="btn btn-primary btn-lg px-4">Go to Dashboard</a>
+                <a href="/EduConnect/<?= strtolower($_SESSION['role']) ?>/dashboard.php" class="btn btn-primary btn-lg px-4">Go to Dashboard</a>
             <?php endif; ?>
         <?php endif; ?>
     </div>
@@ -52,8 +52,8 @@ require_once 'includes/header.php';
         <div class="card h-100 border-0">
             <div class="card-body">
                 <i class="fa-solid fa-paper-plane fa-3x text-success mb-3"></i>
-                <h5 class="fw-bold">2. Send Request</h5>
-                <p class="text-muted">Find a tutor you like and send them a hiring request directly.</p>
+                <h5 class="fw-bold">2. Post Job Request</h5>
+                <p class="text-muted">Post your tutoring needs, and interested tutors will apply with their salary proposals.</p>
             </div>
         </div>
     </div>
@@ -61,8 +61,8 @@ require_once 'includes/header.php';
         <div class="card h-100 border-0">
             <div class="card-body">
                 <i class="fa-solid fa-graduation-cap fa-3x text-info mb-3"></i>
-                <h5 class="fw-bold">3. Start Learning</h5>
-                <p class="text-muted">Once accepted, start your learning journey and achieve great results!</p>
+                <h5 class="fw-bold">3. Negotiate & Hire</h5>
+                <p class="text-muted">Review proposals, counter the salary if needed, and accept the best tutor for your needs.</p>
             </div>
         </div>
     </div>
@@ -82,14 +82,17 @@ require_once 'includes/header.php';
                 <div class="col">
                     <div class="card h-100 text-center">
                         <div class="card-body">
-                            <img src="https://ui-avatars.com/api/?name=<?= urlencode($tutor['name']) ?>&background=random" alt="Avatar" class="tutor-avatar mb-3">
+                            <?php 
+                                $tutor_pic = !empty($tutor['picture']) ? htmlspecialchars($tutor['picture']) : "https://ui-avatars.com/api/?name=" . urlencode($tutor['name']) . "&background=random";
+                            ?>
+                            <img src="<?= $tutor_pic ?>" alt="Avatar" class="tutor-avatar mb-3" onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($tutor['name']) ?>&background=random'">
                             <h5 class="card-title fw-bold"><?= htmlspecialchars($tutor['name']) ?></h5>
                             <p class="card-text text-muted mb-1"><i class="fa-solid fa-book text-primary"></i> <?= htmlspecialchars($tutor['subject'] ?: 'Subject not specified') ?></p>
                             <p class="card-text text-muted mb-3"><i class="fa-solid fa-map-marker-alt text-danger"></i> <?= htmlspecialchars($tutor['location'] ?: 'Location not specified') ?></p>
                             <?php if(isLoggedIn() && $_SESSION['role'] === 'Student'): ?>
-                                <a href="/HomeTutor/student/view_tutor.php?id=<?= $tutor['user_id'] ?>" class="btn btn-outline-primary w-100 mt-auto">View Profile</a>
+                                <a href="/EduConnect/student/view_tutor.php?id=<?= $tutor['user_id'] ?>" class="btn btn-outline-primary w-100 mt-auto">View Profile</a>
                             <?php elseif(!isLoggedIn()): ?>
-                                <a href="/HomeTutor/auth/login.php" class="btn btn-outline-secondary w-100 mt-auto">Login to View</a>
+                                <a href="/EduConnect/auth/login.php" class="btn btn-outline-secondary w-100 mt-auto">Login to View</a>
                             <?php endif; ?>
                         </div>
                     </div>

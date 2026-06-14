@@ -2,12 +2,15 @@
 require_once '../config.php';
 checkRole('Student');
 
+$subjects = ['English', 'Math', 'Bangla', 'Physics', 'Chemistry', 'Biology', 'Arts', 'Commerce'];
+$locations = ['Badda', 'Banani', 'Baridhara', 'Bashundhara', 'Dhanmondi', 'Gulshan', 'Khilgaon', 'Mirpur', 'Mohammadpur', 'Motijheel', 'New Market', 'Old Dhaka', 'Rampura', 'Tejgaon', 'Uttara'];
+
 $search_subject = trim($_GET['subject'] ?? '');
 $search_location = trim($_GET['location'] ?? '');
 $search_class = trim($_GET['class'] ?? '');
 
 $query = "
-    SELECT u.id as user_id, u.name, tp.subject, tp.location, tp.class_level, tp.salary, tp.experience, tp.availability
+    SELECT u.id as user_id, u.name, tp.subject, tp.location, tp.class_level, tp.salary, tp.experience, tp.availability, tp.picture
     FROM users u
     JOIN tutor_profile tp ON u.id = tp.user_id
     WHERE u.role = 'Tutor'
@@ -15,12 +18,12 @@ $query = "
 $params = [];
 
 if ($search_subject) {
-    $query .= " AND tp.subject LIKE ?";
-    $params[] = "%$search_subject%";
+    $query .= " AND tp.subject = ?";
+    $params[] = $search_subject;
 }
 if ($search_location) {
-    $query .= " AND tp.location LIKE ?";
-    $params[] = "%$search_location%";
+    $query .= " AND tp.location = ?";
+    $params[] = $search_location;
 }
 if ($search_class) {
     $query .= " AND tp.class_level LIKE ?";
@@ -45,10 +48,20 @@ require_once '../includes/header.php';
     <div class="card-body bg-light">
         <form method="GET" action="" class="row g-3">
             <div class="col-md-3">
-                <input type="text" name="subject" class="form-control" placeholder="Subject (e.g. Math)" value="<?= htmlspecialchars($search_subject) ?>">
+                <select name="subject" class="form-select">
+                    <option value="">All Subjects</option>
+                    <?php foreach ($subjects as $sub): ?>
+                        <option value="<?= $sub ?>" <?= $search_subject === $sub ? 'selected' : '' ?>><?= $sub ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="col-md-3">
-                <input type="text" name="location" class="form-control" placeholder="Location" value="<?= htmlspecialchars($search_location) ?>">
+                <select name="location" class="form-select">
+                    <option value="">All Locations (Dhaka)</option>
+                    <?php foreach ($locations as $loc): ?>
+                        <option value="<?= $loc ?>" <?= $search_location === $loc ? 'selected' : '' ?>><?= $loc ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="col-md-3">
                 <input type="text" name="class" class="form-control" placeholder="Class Level" value="<?= htmlspecialchars($search_class) ?>">
@@ -70,7 +83,10 @@ require_once '../includes/header.php';
             <div class="col">
                 <div class="card h-100">
                     <div class="card-body text-center">
-                        <img src="/HomeTutor/assets/images/default-avatar.png" alt="Avatar" class="tutor-avatar mb-3" onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($tutor['name']) ?>&background=random'">
+                        <?php 
+                            $tutor_pic = !empty($tutor['picture']) ? htmlspecialchars($tutor['picture']) : "https://ui-avatars.com/api/?name=" . urlencode($tutor['name']) . "&background=random";
+                        ?>
+                        <img src="<?= $tutor_pic ?>" alt="Avatar" class="tutor-avatar mb-3" onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($tutor['name']) ?>&background=random'">
                         <h5 class="card-title fw-bold"><?= htmlspecialchars($tutor['name']) ?></h5>
                         <p class="card-text text-muted mb-1"><i class="fa-solid fa-book text-primary"></i> <?= htmlspecialchars($tutor['subject'] ?: 'Not specified') ?></p>
                         <p class="card-text text-muted mb-2"><i class="fa-solid fa-map-marker-alt text-danger"></i> <?= htmlspecialchars($tutor['location'] ?: 'Not specified') ?></p>
@@ -81,7 +97,7 @@ require_once '../includes/header.php';
                             <span class="badge bg-danger mb-3">Not Available</span>
                         <?php endif; ?>
                         
-                        <a href="/HomeTutor/student/view_tutor.php?id=<?= $tutor['user_id'] ?>" class="btn btn-outline-primary w-100 mt-auto">View Profile</a>
+                        <a href="/EduConnect/student/view_tutor.php?id=<?= $tutor['user_id'] ?>" class="btn btn-outline-primary w-100 mt-auto">View Profile</a>
                     </div>
                 </div>
             </div>

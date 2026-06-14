@@ -11,7 +11,7 @@ $total_students = $roles_count['Student'] ?? 0;
 $total_admins = $roles_count['Admin'] ?? 0;
 
 // Get total requests
-$stmt = $pdo->query("SELECT COUNT(*) FROM requests");
+$stmt = $pdo->query("SELECT COUNT(*) FROM guardian_requests");
 $total_requests = $stmt->fetchColumn();
 
 require_once '../includes/header.php';
@@ -58,7 +58,7 @@ require_once '../includes/header.php';
                     <i class="fa-solid fa-paper-plane"></i>
                 </div>
                 <div>
-                    <h5 class="card-title mb-0">Total Requests</h5>
+                    <h5 class="card-title mb-0">Total Job Posts</h5>
                     <h3 class="fw-bold mb-0"><?= $total_requests ?></h3>
                 </div>
             </div>
@@ -84,7 +84,7 @@ require_once '../includes/header.php';
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Quick Actions</h5>
-                <a href="/HomeTutor/admin/manage_users.php" class="btn btn-primary mt-3"><i class="fa-solid fa-users me-2"></i> Manage All Users</a>
+                <a href="/EduConnect/admin/manage_users.php" class="btn btn-primary mt-3"><i class="fa-solid fa-users me-2"></i> Manage All Users</a>
             </div>
         </div>
     </div>

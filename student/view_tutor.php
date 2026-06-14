@@ -21,29 +21,7 @@ if (!$tutor) {
     die("Tutor not found.");
 }
 
-// Handle sending request
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send_request'])) {
-    $message = trim($_POST['message'] ?? '');
-    
-    if (empty($message)) {
-        $error = "Message cannot be empty.";
-    } else {
-        // Check if a pending request already exists
-        $check_stmt = $pdo->prepare("SELECT id FROM requests WHERE student_id = ? AND tutor_id = ? AND status = 'Pending'");
-        $check_stmt->execute([$student_id, $tutor_id]);
-        
-        if ($check_stmt->fetch()) {
-            $error = "You already have a pending request for this tutor.";
-        } else {
-            $insert_stmt = $pdo->prepare("INSERT INTO requests (student_id, tutor_id, message) VALUES (?, ?, ?)");
-            if ($insert_stmt->execute([$student_id, $tutor_id, $message])) {
-                $success = "Request sent successfully!";
-            } else {
-                $error = "Failed to send request.";
-            }
-        }
-    }
-}
+// Direct request sending logic removed
 
 require_once '../includes/header.php';
 ?>
@@ -52,7 +30,10 @@ require_once '../includes/header.php';
     <div class="col-md-4">
         <div class="card mb-4 text-center">
             <div class="card-body">
-                <img src="https://ui-avatars.com/api/?name=<?= urlencode($tutor['name']) ?>&background=random" class="tutor-avatar mb-3" alt="Avatar">
+                <?php 
+                    $tutor_pic = !empty($tutor['picture']) ? htmlspecialchars($tutor['picture']) : "https://ui-avatars.com/api/?name=" . urlencode($tutor['name']) . "&background=random";
+                ?>
+                <img src="<?= $tutor_pic ?>" class="tutor-avatar mb-3" alt="Avatar" onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($tutor['name']) ?>&background=random'">
                 <h4 class="card-title fw-bold"><?= htmlspecialchars($tutor['name']) ?></h4>
                 <p class="text-muted"><?= htmlspecialchars($tutor['subject']) ?></p>
                 <?php if($tutor['availability'] == 'Available'): ?>
@@ -63,26 +44,7 @@ require_once '../includes/header.php';
             </div>
         </div>
         
-        <?php if($tutor['availability'] == 'Available'): ?>
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Send Tutoring Request</h5>
-                    <?php if($success): ?>
-                        <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-                    <?php endif; ?>
-                    <?php if($error): ?>
-                        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-                    <?php endif; ?>
-                    <form method="POST" action="">
-                        <div class="mb-3">
-                            <label class="form-label">Your Message</label>
-                            <textarea name="message" class="form-control" rows="4" placeholder="Hello, I would like to hire you for..." required></textarea>
-                        </div>
-                        <button type="submit" name="send_request" class="btn btn-primary w-100">Send Request</button>
-                    </form>
-                </div>
-            </div>
-        <?php endif; ?>
+        <!-- Tutoring request form removed as direct requests are disabled -->
     </div>
     
     <div class="col-md-8">

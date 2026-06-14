@@ -21,10 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt->fetch()) {
             $error = "Email already registered.";
         } else {
-            // Hash password
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            // Store password in plain text
             $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-            if ($stmt->execute([$name, $email, $hashedPassword, $role])) {
+            if ($stmt->execute([$name, $email, $password, $role])) {
                 $userId = $pdo->lastInsertId();
                 // If tutor, create empty profile
                 if ($role === 'Tutor') {
@@ -76,7 +75,7 @@ require_once '../includes/header.php';
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary w-100 py-2">Register</button>
-                    <p class="text-center mt-3 mb-0">Already have an account? <a href="/HomeTutor/auth/login.php">Login here</a></p>
+                    <p class="text-center mt-3 mb-0">Already have an account? <a href="/EduConnect/auth/login.php">Login here</a></p>
                 </form>
             </div>
         </div>

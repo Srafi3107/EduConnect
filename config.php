@@ -1,13 +1,14 @@
 <?php
 session_start();
 
-$host = 'localhost';
+$host = '127.0.0.1';
+$port = '3307';
 $dbname = 'hometutor_db';
 $username = 'root'; // default XAMPP/WAMP user
 $password = ''; // default XAMPP/WAMP password
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
+    $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $username, $password);
     // Set PDO error mode to exception
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // Set default fetch mode to associative array
@@ -24,7 +25,7 @@ function isLoggedIn() {
 // Helper function to check user role
 function checkRole($role) {
     if (!isLoggedIn() || $_SESSION['role'] !== $role) {
-        header("Location: /HomeTutor/auth/login.php");
+        header("Location: /EduConnect/auth/login.php");
         exit();
     }
 }
