@@ -1,6 +1,4 @@
-# EduConnect - Home Tutor Finding Platform
-
-## Overview
+# Overview
 
 **EduConnect** is a full-stack web application that connects students, parents, and qualified home tutors through a secure, transparent, and efficient online marketplace.
 
