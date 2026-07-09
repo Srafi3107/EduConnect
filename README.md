@@ -1,5 +1,3 @@
-# Overview
-
 **EduConnect** is a full-stack web application that connects students, parents, and qualified home tutors through a secure, transparent, and efficient online marketplace.
 
 The platform streamlines the tutor hiring process by eliminating dependence on unreliable referrals and expensive tuition agencies. Through role-based access control, EduConnect provides dedicated dashboards for Students/Parents, Tutors, and Administrators, ensuring a seamless experience for all users.
