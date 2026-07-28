@@ -13,6 +13,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_user'])) {
     if ($user_id_to_delete == $_SESSION['user_id']) {
         $error = "You cannot delete your own account.";
     } else {
+        // Fetch and delete profile picture from disk if it exists
+        $stmt_pic = $pdo->prepare("SELECT picture FROM tutor_profile WHERE user_id = ?");
+        $stmt_pic->execute([$user_id_to_delete]);
+        $pic = $stmt_pic->fetchColumn();
+        if (!empty($pic)) {
+            $old_file = '../assets/uploads/tutors/' . basename($pic);
+            if (file_exists($old_file)) {
+                @unlink($old_file);
+            }
+        }
+
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         if ($stmt->execute([$user_id_to_delete])) {
             $success = "User deleted successfully.";
@@ -77,7 +88,8 @@ require_once '../includes/header.php';
                                 <?php if($u['id'] != $_SESSION['user_id']): ?>
                                     <form method="POST" action="" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
                                         <input type="hidden" name="user_id" value="<?= $u['id'] ?>">
-                                        <button type="submit" name="delete_user" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i> Delete</button>
+                                        <input type="hidden" name="delete_user" value="1">
+                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i> Delete</button>
                                     </form>
                                 <?php else: ?>
                                     <span class="text-muted">Current User</span>

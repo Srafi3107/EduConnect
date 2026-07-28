@@ -6,8 +6,7 @@ $student_id = $_SESSION['user_id'];
 $success = '';
 $error = '';
 
-$subjects = ['English', 'Math', 'Bangla', 'Physics', 'Chemistry', 'Biology', 'Arts', 'Commerce'];
-$locations = ['Badda', 'Banani', 'Baridhara', 'Bashundhara', 'Dhanmondi', 'Gulshan', 'Khilgaon', 'Mirpur', 'Mohammadpur', 'Motijheel', 'New Market', 'Old Dhaka', 'Rampura', 'Tejgaon', 'Uttara'];
+
 
 // Handle posting new public tutor request
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['post_request'])) {
@@ -42,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['app_action'])) {
 
     // Verify application is for a request owned by this student
     $verify_stmt = $pdo->prepare("
-        SELECT a.id, a.request_id 
+        SELECT a.id, a.request_id, a.tutor_id 
         FROM guardian_request_applications a
         JOIN guardian_requests r ON a.request_id = r.id
         WHERE a.id = ? AND r.student_id = ?
@@ -52,21 +51,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['app_action'])) {
 
     if ($app) {
         if ($action === 'accept') {
-            $pdo->beginTransaction();
-            try {
-                // Update application status
-                $stmt = $pdo->prepare("UPDATE guardian_request_applications SET status = 'Accepted' WHERE id = ?");
-                $stmt->execute([$app_id]);
-                
-                // If accepted, reject all other applications for the same request
-                $stmt = $pdo->prepare("UPDATE guardian_request_applications SET status = 'Rejected' WHERE request_id = ? AND id != ?");
-                $stmt->execute([$app['request_id'], $app_id]);
-                
-                $pdo->commit();
-                $success = "Application status updated to Accepted!";
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                $error = "Failed to accept application: " . $e->getMessage();
+            // Check if tutor already has 2 accepted tuitions
+            $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM guardian_request_applications WHERE tutor_id = ? AND status = 'Accepted'");
+            $count_stmt->execute([$app['tutor_id']]);
+            $accepted_count = $count_stmt->fetchColumn();
+
+            if ($accepted_count >= 2) {
+                $error = "This tutor has already reached their maximum limit of 2 active tuitions.";
+            } else {
+                $pdo->beginTransaction();
+                try {
+                    // Update application status
+                    $stmt = $pdo->prepare("UPDATE guardian_request_applications SET status = 'Accepted' WHERE id = ?");
+                    $stmt->execute([$app_id]);
+                    
+                    // If accepted, reject all other applications for the same request
+                    $stmt = $pdo->prepare("UPDATE guardian_request_applications SET status = 'Rejected' WHERE request_id = ? AND id != ?");
+                    $stmt->execute([$app['request_id'], $app_id]);
+                    
+                    // Check again and update tutor availability if they just reached 2
+                    if ($accepted_count + 1 >= 2) {
+                        $update_tutor = $pdo->prepare("UPDATE tutor_profile SET availability = 'Not Available' WHERE user_id = ?");
+                        $update_tutor->execute([$app['tutor_id']]);
+                    }
+                    
+                    $pdo->commit();
+                    $success = "Application status updated to Accepted!";
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    $error = "Failed to accept application: " . $e->getMessage();
+                }
             }
         } elseif ($action === 'reject') {
             $stmt = $pdo->prepare("UPDATE guardian_request_applications SET status = 'Rejected' WHERE id = ?");
@@ -88,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['app_action'])) {
                     WHERE id = ?
                 ");
                 if ($stmt->execute([$counter_salary, $app_id])) {
-                    $success = "Counter-offer of $" . number_format($counter_salary, 2) . " sent successfully!";
+                    $success = "Counter-offer of BDT " . number_format($counter_salary, 2) . " sent successfully!";
                 } else {
                     $error = "Failed to send counter-offer.";
                 }
@@ -164,7 +178,12 @@ require_once '../includes/header.php';
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Class Level</label>
-                        <input type="text" name="class_level" class="form-control" placeholder="e.g. Grade 10, HSC" required>
+                        <select name="class_level" class="form-select" required>
+                            <option value="">Select Class Level</option>
+                            <?php foreach ($classes as $cls): ?>
+                                <option value="<?= $cls ?>"><?= $cls ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Location (Dhaka)</label>
@@ -180,7 +199,7 @@ require_once '../includes/header.php';
                         <input type="text" name="additional_address" class="form-control" placeholder="e.g. House 12, Road 4, Sector 3" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Budget / Salary (per month)</label>
+                        <label class="form-label">Budget / Salary (BDT per month)</label>
                         <input type="number" name="salary" class="form-control" placeholder="e.g. 5000" required>
                     </div>
                     <div class="mb-3">
@@ -211,7 +230,7 @@ require_once '../includes/header.php';
                         <p class="mb-2">
                             <span class="me-3"><i class="fa-solid fa-graduation-cap text-muted"></i> Class: <strong><?= htmlspecialchars($post['class_level']) ?></strong></span>
                             <span class="me-3"><i class="fa-solid fa-map-marker-alt text-muted"></i> Location: <strong><?= htmlspecialchars($post['location']) ?></strong><?= !empty($post['additional_address']) ? ' (' . htmlspecialchars($post['additional_address']) . ')' : '' ?></span>
-                            <span><i class="fa-solid fa-money-bill-wave text-muted"></i> Budget: <strong>$<?= htmlspecialchars(number_format($post['salary'], 2)) ?></strong></span>
+                            <span><i class="fa-solid fa-money-bill-wave text-muted"></i> Budget: <strong>BDT <?= htmlspecialchars(number_format($post['salary'], 2)) ?></strong></span>
                         </p>
                         <?php if($post['description']): ?>
                             <p class="text-muted mb-3 bg-light p-2 rounded" style="font-size: 0.9rem;"><?= nl2br(htmlspecialchars($post['description'])) ?></p>
@@ -237,7 +256,7 @@ require_once '../includes/header.php';
                                                 <small class="text-muted"><?= htmlspecialchars($app['tutor_email']) ?> | Exp: <?= htmlspecialchars($app['experience'] ?: 'Not specified') ?></small>
                                             </div>
                                             <div class="text-end">
-                                                <span class="d-block fw-bold text-success">$<?= htmlspecialchars(number_format($app['proposed_salary'], 2)) ?></span>
+                                                <span class="d-block fw-bold text-success">BDT <?= htmlspecialchars(number_format($app['proposed_salary'], 2)) ?></span>
                                                 <small class="text-muted"><?= ($app['app_status'] === 'Negotiating') ? 'Current Offer' : 'Proposed Salary' ?></small>
                                             </div>
                                         </div>

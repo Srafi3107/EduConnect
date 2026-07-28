@@ -85,6 +85,7 @@ require_once '../includes/header.php';
             <div class="card-body">
                 <h5 class="card-title">Quick Actions</h5>
                 <a href="/EduConnect/admin/manage_users.php" class="btn btn-primary mt-3"><i class="fa-solid fa-users me-2"></i> Manage All Users</a>
+                <a href="/EduConnect/admin/manage_requests.php" class="btn btn-success mt-3 ms-2"><i class="fa-solid fa-file-invoice-dollar me-2"></i> Manage Tuition Requests</a>
             </div>
         </div>
     </div>

@@ -17,6 +17,11 @@ try {
     die("Connection failed: " . $e->getMessage());
 }
 
+// Global Arrays for standardizing inputs across the application
+$subjects = ['English', 'Math', 'Bangla', 'Physics', 'Chemistry', 'Biology', 'Arts', 'Commerce'];
+$locations = ['Badda', 'Banani', 'Baridhara', 'Bashundhara', 'Dhanmondi', 'Gulshan', 'Khilgaon', 'Mirpur', 'Mohammadpur', 'Motijheel', 'New Market', 'Old Dhaka', 'Rampura', 'Tejgaon', 'Uttara'];
+$classes = ['Grade 1-8', 'Grade 9-10', 'O-Level', 'A-Level', 'HSC'];
+
 // Helper function to check if user is logged in
 function isLoggedIn() {
     return isset($_SESSION['user_id']);

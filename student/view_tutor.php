@@ -65,7 +65,7 @@ require_once '../includes/header.php';
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-3 fw-bold">Expected Salary:</div>
-                    <div class="col-sm-9">$<?= htmlspecialchars($tutor['salary'] ?: '0.00') ?></div>
+                    <div class="col-sm-9">BDT <?= htmlspecialchars(number_format($tutor['salary'] ?: 0, 2)) ?></div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-sm-3 fw-bold">About:</div>

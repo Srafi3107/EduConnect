@@ -2,8 +2,7 @@
 require_once '../config.php';
 checkRole('Student');
 
-$subjects = ['English', 'Math', 'Bangla', 'Physics', 'Chemistry', 'Biology', 'Arts', 'Commerce'];
-$locations = ['Badda', 'Banani', 'Baridhara', 'Bashundhara', 'Dhanmondi', 'Gulshan', 'Khilgaon', 'Mirpur', 'Mohammadpur', 'Motijheel', 'New Market', 'Old Dhaka', 'Rampura', 'Tejgaon', 'Uttara'];
+
 
 $search_subject = trim($_GET['subject'] ?? '');
 $search_location = trim($_GET['location'] ?? '');
@@ -26,8 +25,8 @@ if ($search_location) {
     $params[] = $search_location;
 }
 if ($search_class) {
-    $query .= " AND tp.class_level LIKE ?";
-    $params[] = "%$search_class%";
+    $query .= " AND tp.class_level = ?";
+    $params[] = $search_class;
 }
 
 $stmt = $pdo->prepare($query);
@@ -64,7 +63,12 @@ require_once '../includes/header.php';
                 </select>
             </div>
             <div class="col-md-3">
-                <input type="text" name="class" class="form-control" placeholder="Class Level" value="<?= htmlspecialchars($search_class) ?>">
+                <select name="class" class="form-select">
+                    <option value="">All Classes</option>
+                    <?php foreach ($classes as $cls): ?>
+                        <option value="<?= $cls ?>" <?= $search_class === $cls ? 'selected' : '' ?>><?= $cls ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
             <div class="col-md-3">
                 <button type="submit" class="btn btn-primary w-100"><i class="fa-solid fa-search"></i> Search</button>

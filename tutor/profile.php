@@ -2,8 +2,7 @@
 require_once '../config.php';
 checkRole('Tutor');
 
-$subjects = ['English', 'Math', 'Bangla', 'Physics', 'Chemistry', 'Biology', 'Arts', 'Commerce'];
-$locations = ['Badda', 'Banani', 'Baridhara', 'Bashundhara', 'Dhanmondi', 'Gulshan', 'Khilgaon', 'Mirpur', 'Mohammadpur', 'Motijheel', 'New Market', 'Old Dhaka', 'Rampura', 'Tejgaon', 'Uttara'];
+
 
 $tutor_id = $_SESSION['user_id'];
 $success = '';
@@ -22,6 +21,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $salary = trim($_POST['salary'] ?? 0);
     $description = trim($_POST['description'] ?? '');
     $availability = $_POST['availability'] ?? 'Available';
+
+    // Count accepted tuitions
+    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM guardian_request_applications WHERE tutor_id = ? AND status = 'Accepted'");
+    $count_stmt->execute([$tutor_id]);
+    $accepted_count = $count_stmt->fetchColumn();
+    
+    // Force Not Available if limit reached
+    if ($accepted_count >= 2) {
+        $availability = 'Not Available';
+    }
     $picture_path = $profile['picture'] ?? null;
 
     // Handle picture upload
@@ -79,6 +88,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
+// Fetch active tuitions count for display
+if (!isset($accepted_count)) {
+    $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM guardian_request_applications WHERE tutor_id = ? AND status = 'Accepted'");
+    $count_stmt->execute([$tutor_id]);
+    $accepted_count = $count_stmt->fetchColumn();
+}
+
 require_once '../includes/header.php';
 ?>
 
@@ -120,7 +136,12 @@ require_once '../includes/header.php';
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Class Level</label>
-                            <input type="text" name="class_level" class="form-control" value="<?= htmlspecialchars($profile['class_level'] ?? '') ?>" placeholder="e.g. Grade 1-5, O-Level">
+                            <select name="class_level" class="form-select" required>
+                                <option value="">Select Class Level</option>
+                                <?php foreach ($classes as $cls): ?>
+                                    <option value="<?= $cls ?>" <?= ($profile['class_level'] ?? '') === $cls ? 'selected' : '' ?>><?= $cls ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                     
@@ -135,7 +156,7 @@ require_once '../includes/header.php';
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Expected Salary (per month/hour)</label>
+                            <label class="form-label">Expected Salary (BDT per month)</label>
                             <input type="number" step="0.01" name="salary" class="form-control" value="<?= htmlspecialchars($profile['salary'] ?? '') ?>">
                         </div>
                     </div>
@@ -146,11 +167,17 @@ require_once '../includes/header.php';
                             <input type="text" name="experience" class="form-control" value="<?= htmlspecialchars($profile['experience'] ?? '') ?>" placeholder="e.g. 5 Years">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Availability Status</label>
-                            <select name="availability" class="form-select">
-                                <option value="Available" <?= ($profile['availability'] == 'Available') ? 'selected' : '' ?>>Available</option>
-                                <option value="Not Available" <?= ($profile['availability'] == 'Not Available') ? 'selected' : '' ?>>Not Available</option>
-                            </select>
+                            <label class="form-label">Availability</label>
+                            <?php if ($accepted_count >= 2): ?>
+                                <input type="text" class="form-control bg-light text-danger fw-bold" value="Not Available (Limit Reached: <?= $accepted_count ?>/2)" readonly>
+                                <input type="hidden" name="availability" value="Not Available">
+                            <?php else: ?>
+                                <select name="availability" class="form-select" required>
+                                    <option value="Available" <?= ($profile['availability'] ?? '') == 'Available' ? 'selected' : '' ?>>Available</option>
+                                    <option value="Not Available" <?= ($profile['availability'] ?? '') == 'Not Available' ? 'selected' : '' ?>>Not Available</option>
+                                </select>
+                                <small class="text-muted d-block mt-1">Active Tuitions: <?= $accepted_count ?>/2</small>
+                            <?php endif; ?>
                         </div>
                     </div>
 

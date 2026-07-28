@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['app_action'])) {
                     WHERE id = ?
                 ");
                 if ($stmt->execute([$counter_salary, $app_id])) {
-                    $success = "Counter-offer of $" . number_format($counter_salary, 2) . " sent successfully!";
+                    $success = "Counter-offer of BDT " . number_format($counter_salary, 2) . " sent successfully!";
                 } else {
                     $error = "Failed to send counter-offer.";
                 }
@@ -137,9 +137,9 @@ require_once '../includes/header.php';
                                         <small class="text-success"><i class="fa-solid fa-envelope"></i> <?= htmlspecialchars($app['guardian_email']) ?></small>
                                     <?php endif; ?>
                                 </td>
-                                <td>$<?= htmlspecialchars(number_format($app['original_budget'], 2)) ?></td>
+                                <td>BDT <?= htmlspecialchars(number_format($app['original_budget'], 2)) ?></td>
                                 <td>
-                                    <span class="fw-bold text-success">$<?= htmlspecialchars(number_format($app['proposed_salary'], 2)) ?></span>
+                                    <span class="fw-bold text-success">BDT <?= htmlspecialchars(number_format($app['proposed_salary'], 2)) ?></span>
                                 </td>
                                 <td>
                                     <?php 

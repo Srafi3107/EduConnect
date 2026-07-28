@@ -27,6 +27,7 @@
                         <?php if($_SESSION['role'] === 'Admin'): ?>
                             <li class="nav-item"><a class="nav-link" href="/EduConnect/admin/dashboard.php">Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link" href="/EduConnect/admin/manage_users.php">Manage Users</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/EduConnect/admin/manage_requests.php">Manage Requests</a></li>
                         <?php elseif($_SESSION['role'] === 'Tutor'): ?>
                             <li class="nav-item"><a class="nav-link" href="/EduConnect/tutor/dashboard.php">Dashboard</a></li>
                             <li class="nav-item"><a class="nav-link" href="/EduConnect/tutor/job_board.php">Job Board</a></li>
@@ -45,10 +46,10 @@
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-outline-light btn-sm ms-2 px-3" href="/EduConnect/auth/login.php">Login</a>
+                            <a class="btn btn-outline-light btn-sm ms-2 px-3" href="/EduConnect/auth/login.php">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-light text-primary btn-sm ms-2 px-3 fw-bold" href="/EduConnect/auth/register.php">Register</a>
+                            <a class="btn btn-light text-primary btn-sm ms-2 px-3 fw-bold" href="/EduConnect/auth/register.php">Register</a>
                         </li>
                     <?php endif; ?>
                 </ul>
