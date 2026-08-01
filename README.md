@@ -107,3 +107,18 @@ EduConnect provides a transparent and efficient solution for the home tutoring e
 ## Project Goal
 
 The primary goal of EduConnect is to build a reliable, user-friendly, and scalable digital platform that connects students, parents, and qualified home tutors while making the tutor discovery and hiring process more secure, transparent, and efficient.
+
+
+Section	What it Explains
+Project Overview	Architecture, folder structure, how roles work
+Database Structure	All 4 tables and what every column does
+config.php	Session, PDO connection, global arrays, security functions — line by line
+login.php	Form handling, password check, session saving, role-based redirect
+register.php	Validation, duplicate email check, auto-create tutor profile
+tutor/profile.php	File upload, UPDATE query, 2-tuition limit enforcement (backend + UI)
+tutor/job_board.php	The big filtered SQL query explained word-by-word, limit checks, hide filled jobs
+student/public_requests.php	POST job, accept tutor, transactions (commit/rollback)
+admin/manage_users.php	Delete users, cascade delete, self-deletion prevention
+admin/manage_requests.php	Subqueries for Open/Filled status
+Key Concepts	Sessions, PDO, Prepared Statements, Transactions, JOIN — all explained simply
+
