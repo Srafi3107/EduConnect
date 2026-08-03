@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['post_request'])) {
     $salary = trim($_POST['salary'] ?? 0);
     $description = trim($_POST['description'] ?? '');
     $additional_address = trim($_POST['additional_address'] ?? '');
+    $gender_preference = $_POST['gender_preference'] ?? 'Any';
 
     if (empty($subject) || empty($class_level) || empty($location) || empty($salary)) {
         $error = "All mandatory fields (Subject, Class Level, Location, Salary) are required.";
@@ -23,10 +24,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['post_request'])) {
         $error = "Salary must be a positive number.";
     } else {
         $stmt = $pdo->prepare("
-            INSERT INTO guardian_requests (student_id, subject, class_level, location, salary, description, additional_address)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO guardian_requests (student_id, subject, class_level, location, salary, description, additional_address, gender_preference)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        if ($stmt->execute([$student_id, $subject, $class_level, $location, $salary, $description, $additional_address])) {
+        if ($stmt->execute([$student_id, $subject, $class_level, $location, $salary, $description, $additional_address, $gender_preference])) {
             $success = "Tutor request posted successfully! Tutors can now view and apply to this request.";
         } else {
             $error = "Failed to post tutor request.";
@@ -113,6 +114,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['app_action'])) {
     }
 }
 
+// Handle Request Actions (Close / Delete)
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['request_action'])) {
+    $req_id = $_POST['request_id'] ?? 0;
+    $action = $_POST['action'] ?? '';
+    
+    // Verify ownership
+    $stmt = $pdo->prepare("SELECT id FROM guardian_requests WHERE id = ? AND student_id = ?");
+    $stmt->execute([$req_id, $student_id]);
+    if ($stmt->fetch()) {
+        if ($action === 'close') {
+            $stmt = $pdo->prepare("UPDATE guardian_requests SET status = 'Closed' WHERE id = ?");
+            if ($stmt->execute([$req_id])) {
+                $success = "Tutor request closed successfully. It will no longer receive applications.";
+            } else {
+                $error = "Failed to close request.";
+            }
+        } elseif ($action === 'delete') {
+            $stmt = $pdo->prepare("DELETE FROM guardian_requests WHERE id = ?");
+            if ($stmt->execute([$req_id])) {
+                $success = "Tutor request deleted successfully.";
+            } else {
+                $error = "Failed to delete request.";
+            }
+        }
+    }
+}
+
 // Fetch all public requests posted by this student, including count of applications
 $stmt = $pdo->prepare("
     SELECT r.*, COUNT(a.id) as app_count 
@@ -130,7 +158,7 @@ $posts_with_apps = [];
 foreach ($my_posts as $post) {
     $app_stmt = $pdo->prepare("
         SELECT a.id as app_id, a.proposed_salary, a.message, a.status as app_status, a.offered_by, a.created_at as applied_at,
-               u.name as tutor_name, u.email as tutor_email, tp.experience, tp.picture
+               u.name as tutor_name, u.email as tutor_email, u.phone, u.gender, tp.experience, tp.picture
         FROM guardian_request_applications a
         JOIN users u ON a.tutor_id = u.id
         JOIN tutor_profile tp ON u.id = tp.user_id
@@ -167,6 +195,14 @@ require_once '../includes/header.php';
                 <h5 class="card-title fw-bold mb-3"><i class="fa-solid fa-plus-circle text-primary me-2"></i>New Tutor Request</h5>
                 <form method="POST" action="">
                     <input type="hidden" name="post_request" value="1">
+                    <div class="mb-3">
+                        <label class="form-label">Tutor Gender Preference</label>
+                        <select name="gender_preference" class="form-select" required>
+                            <option value="Any">Any Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
                     <div class="mb-3">
                         <label class="form-label">Subject</label>
                         <select name="subject" class="form-select" required>
@@ -224,12 +260,34 @@ require_once '../includes/header.php';
                 <div class="card mb-4 border-start border-4 border-primary">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="fw-bold mb-0 text-primary"><?= htmlspecialchars($post['subject']) ?></h5>
-                            <span class="badge bg-secondary"><?= date('M d, Y', strtotime($post['created_at'])) ?></span>
+                            <h5 class="fw-bold mb-0 text-primary">
+                                <?= htmlspecialchars($post['subject']) ?>
+                                <?php if(($post['status'] ?? 'Open') == 'Closed'): ?>
+                                    <span class="badge bg-secondary ms-2" style="font-size: 0.75rem;">Closed</span>
+                                <?php endif; ?>
+                            </h5>
+                            <div>
+                                <span class="badge bg-light text-dark me-2 border"><?= date('M d, Y', strtotime($post['created_at'])) ?></span>
+                                <form method="POST" action="" class="d-inline">
+                                    <input type="hidden" name="request_action" value="1">
+                                    <input type="hidden" name="request_id" value="<?= $post['id'] ?>">
+                                    <?php if(($post['status'] ?? 'Open') == 'Open'): ?>
+                                        <input type="hidden" name="action" value="close">
+                                        <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2" title="Close Request" onclick="return confirm('Are you sure you want to close this request? No more applications can be sent.');"><i class="fa-solid fa-lock"></i></button>
+                                    <?php endif; ?>
+                                </form>
+                                <form method="POST" action="" class="d-inline">
+                                    <input type="hidden" name="request_action" value="1">
+                                    <input type="hidden" name="request_id" value="<?= $post['id'] ?>">
+                                    <input type="hidden" name="action" value="delete">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Delete Request" onclick="return confirm('Are you sure you want to delete this request permanently?');"><i class="fa-solid fa-trash"></i></button>
+                                </form>
+                            </div>
                         </div>
                         <p class="mb-2">
                             <span class="me-3"><i class="fa-solid fa-graduation-cap text-muted"></i> Class: <strong><?= htmlspecialchars($post['class_level']) ?></strong></span>
                             <span class="me-3"><i class="fa-solid fa-map-marker-alt text-muted"></i> Location: <strong><?= htmlspecialchars($post['location']) ?></strong><?= !empty($post['additional_address']) ? ' (' . htmlspecialchars($post['additional_address']) . ')' : '' ?></span>
+                            <span class="me-3"><i class="fa-solid fa-venus-mars text-muted"></i> Gender: <strong><?= htmlspecialchars($post['gender_preference'] ?? 'Any') ?></strong></span>
                             <span><i class="fa-solid fa-money-bill-wave text-muted"></i> Budget: <strong>BDT <?= htmlspecialchars(number_format($post['salary'], 2)) ?></strong></span>
                         </p>
                         <?php if($post['description']): ?>
@@ -253,7 +311,12 @@ require_once '../includes/header.php';
                                             <img src="<?= $tutor_pic ?>" class="tutor-avatar-sm me-3" alt="Avatar" onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($app['tutor_name']) ?>&background=random'">
                                             <div class="flex-grow-1">
                                                 <h6 class="fw-bold mb-0"><?= htmlspecialchars($app['tutor_name']) ?></h6>
-                                                <small class="text-muted"><?= htmlspecialchars($app['tutor_email']) ?> | Exp: <?= htmlspecialchars($app['experience'] ?: 'Not specified') ?></small>
+                                                <small class="text-muted">
+                                                    <i class="fa-solid fa-envelope"></i> <?= htmlspecialchars($app['tutor_email']) ?> | 
+                                                    <i class="fa-solid fa-phone"></i> <?= htmlspecialchars($app['phone'] ?: 'N/A') ?> <br>
+                                                    <i class="fa-solid fa-venus-mars"></i> <?= htmlspecialchars($app['gender'] ?: 'Unspecified') ?> | 
+                                                    <i class="fa-solid fa-briefcase"></i> Exp: <?= htmlspecialchars($app['experience'] ?: 'None') ?>
+                                                </small>
                                             </div>
                                             <div class="text-end">
                                                 <span class="d-block fw-bold text-success">BDT <?= htmlspecialchars(number_format($app['proposed_salary'], 2)) ?></span>

@@ -14,6 +14,14 @@ $total_admins = $roles_count['Admin'] ?? 0;
 $stmt = $pdo->query("SELECT COUNT(*) FROM guardian_requests");
 $total_requests = $stmt->fetchColumn();
 
+// Get total active tuitions
+$stmt = $pdo->query("SELECT COUNT(*) FROM guardian_request_applications WHERE status = 'Accepted'");
+$total_active_tuitions = $stmt->fetchColumn();
+
+// Get total banned users
+$stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'Banned'");
+$total_banned = $stmt->fetchColumn();
+
 require_once '../includes/header.php';
 ?>
 
@@ -64,7 +72,7 @@ require_once '../includes/header.php';
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 mt-4">
         <div class="card summary-card bg-dark text-white h-100">
             <div class="card-body d-flex align-items-center">
                 <div class="icon-box bg-white text-dark me-3">
@@ -73,6 +81,32 @@ require_once '../includes/header.php';
                 <div>
                     <h5 class="card-title mb-0">Admins</h5>
                     <h3 class="fw-bold mb-0"><?= $total_admins ?></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mt-4">
+        <div class="card summary-card bg-primary text-white h-100" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-box bg-white text-warning me-3">
+                    <i class="fa-solid fa-handshake"></i>
+                </div>
+                <div>
+                    <h5 class="card-title mb-0">Active Tuitions</h5>
+                    <h3 class="fw-bold mb-0"><?= $total_active_tuitions ?></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mt-4">
+        <div class="card summary-card bg-danger text-white h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-box bg-white text-danger me-3">
+                    <i class="fa-solid fa-user-slash"></i>
+                </div>
+                <div>
+                    <h5 class="card-title mb-0">Banned Users</h5>
+                    <h3 class="fw-bold mb-0"><?= $total_banned ?></h3>
                 </div>
             </div>
         </div>

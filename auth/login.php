@@ -27,11 +27,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($email) || empty($password)) {
         $error = "Both fields are required.";
     } else {
-        $stmt = $pdo->prepare("SELECT id, name, password, role FROM users WHERE email = ?");
+        $stmt = $pdo->prepare("SELECT id, name, password, role, status FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch();
 
         if ($user && ($password === $user['password'] || password_verify($password, $user['password']))) {
+            if (($user['status'] ?? 'Active') === 'Banned') {
+                $error = "Your account has been banned by an administrator.";
+            } else {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['name'] = $user['name'];
             $_SESSION['role'] = $user['role'];
@@ -54,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 header("Location: /EduConnect/student/dashboard.php");
             }
             exit();
+            }
         } else {
             $error = "Invalid email or password.";
         }

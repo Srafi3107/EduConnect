@@ -1,70 +1,94 @@
-/* Custom styling for Home Tutor Finding System */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Custom styling for Home Tutor Finding System */
 body {
-    background-color: #f8f9fa;
+    background-color: #f0f4f8;
+    font-family: 'Inter', sans-serif;
+    color: #334155;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
+/* Navbar Premium Styling */
+.navbar {
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+    padding: 1rem 0;
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+}
+
+/* Glassmorphism Cards */
 .card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    border-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Modern Buttons */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1.25rem;
+    transition: all 0.2s;
 }
 
 .btn-primary {
-    background-color: #4e73df;
-    border-color: #4e73df;
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    border: none;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .btn-primary:hover {
-    background-color: #2e59d9;
-    border-color: #2653d4;
+    background: linear-gradient(135deg, #4338ca 0%, #2563eb 100%);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
 }
 
+.btn-outline-primary {
+    border: 2px solid #4f46e5;
+    color: #4f46e5;
+}
+
+.btn-outline-primary:hover {
+    background: #4f46e5;
+    color: white;
+}
+
+/* Inputs */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Avatars */
 .tutor-avatar {
     width: 100px;
     height: 100px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid #e3e6f0;
-}
-
-.badge-status-pending {
-    background-color: #f6c23e;
-    color: #fff;
-}
-.badge-status-accepted {
-    background-color: #1cc88a;
-    color: #fff;
-}
-.badge-status-rejected {
-    background-color: #e74a3b;
-    color: #fff;
-}
-
-/* Dashboard summary cards */
-.summary-card .icon-box {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: white;
-}
-
-.badge-status-negotiating {
-    background-color: #fd7e14;
-    color: #fff;
+    border: 4px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
 .tutor-avatar-lg {
@@ -72,7 +96,8 @@ body {
     height: 150px;
     object-fit: cover;
     border-radius: 50%;
-    border: 4px solid #e3e6f0;
+    border: 5px solid #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 .tutor-avatar-sm {
@@ -80,7 +105,34 @@ body {
     height: 45px;
     object-fit: cover;
     border-radius: 50%;
-    border: 2px solid #e3e6f0;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Badges */
+.badge {
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.badge-status-pending { background-color: #f59e0b; color: #fff; }
+.badge-status-accepted { background-color: #10b981; color: #fff; }
+.badge-status-rejected { background-color: #ef4444; color: #fff; }
+.badge-status-negotiating { background-color: #8b5cf6; color: #fff; }
+
+/* Dashboard summary cards */
+.summary-card .icon-box {
+    width: 65px;
+    height: 65px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    box-shadow: 0 6px 15px rgba(59,130,246,0.3);
 }
 
 .upload-btn-wrapper {

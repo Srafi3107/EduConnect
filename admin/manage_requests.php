@@ -28,6 +28,32 @@ $stmt = $pdo->query("
 ");
 $requests = $stmt->fetchAll();
 
+if (isset($_GET['export']) && $_GET['export'] == 'csv') {
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="tuition_requests_' . date('Y-m-d') . '.csv"');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['ID', 'Guardian/Student Name', 'Email', 'Subject', 'Class Level', 'Location', 'Salary (BDT)', 'Gender Pref', 'Status', 'Filled By', 'Total Applications', 'Date Posted']);
+    foreach ($requests as $r) {
+        $display_status = ($r['status'] ?? 'Open') == 'Closed' ? 'Closed' : ($r['filled_by'] ? 'Filled' : 'Open');
+        fputcsv($output, [
+            $r['id'],
+            $r['student_name'],
+            $r['student_email'],
+            $r['subject'],
+            $r['class_level'],
+            $r['location'],
+            $r['salary'],
+            $r['gender_preference'] ?? 'Any',
+            $display_status,
+            $r['filled_by'] ?: 'None',
+            $r['app_count'],
+            $r['created_at']
+        ]);
+    }
+    fclose($output);
+    exit();
+}
+
 require_once '../includes/header.php';
 ?>
 
@@ -37,7 +63,10 @@ require_once '../includes/header.php';
             <h2 class="fw-bold">Manage Tuition Requests</h2>
             <p class="text-muted">View and manage all public tuition requests posted by guardians/students.</p>
         </div>
-        <a href="/EduConnect/admin/dashboard.php" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard</a>
+        <div>
+            <a href="?export=csv" class="btn btn-primary"><i class="fa-solid fa-download me-2"></i>Export CSV</a>
+            <a href="/EduConnect/admin/dashboard.php" class="btn btn-outline-secondary ms-2"><i class="fa-solid fa-arrow-left me-2"></i>Dashboard</a>
+        </div>
     </div>
 </div>
 
@@ -86,7 +115,9 @@ require_once '../includes/header.php';
                                 </td>
                                 <td><strong>BDT <?= htmlspecialchars(number_format($r['salary'], 2)) ?></strong></td>
                                 <td>
-                                    <?php if($r['filled_by']): ?>
+                                    <?php if(($r['status'] ?? 'Open') == 'Closed'): ?>
+                                        <span class="badge bg-secondary">Closed</span>
+                                    <?php elseif($r['filled_by']): ?>
                                         <span class="badge bg-success">Filled</span><br>
                                         <small class="text-muted">by <?= htmlspecialchars($r['filled_by']) ?></small>
                                     <?php else: ?>

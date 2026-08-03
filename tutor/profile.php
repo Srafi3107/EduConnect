@@ -8,13 +8,20 @@ $tutor_id = $_SESSION['user_id'];
 $success = '';
 $error = '';
 
-// Fetch current profile
-$stmt = $pdo->prepare("SELECT * FROM tutor_profile WHERE user_id = ?");
+// Fetch current profile with user data
+$stmt = $pdo->prepare("
+    SELECT tp.*, u.phone, u.gender 
+    FROM tutor_profile tp 
+    JOIN users u ON tp.user_id = u.id 
+    WHERE tp.user_id = ?
+");
 $stmt->execute([$tutor_id]);
 $profile = $stmt->fetch();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $subject = trim($_POST['subject'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $subject1 = trim($_POST['subject1'] ?? '');
+    $subject2 = trim($_POST['subject2'] ?? '');
     $class_level = trim($_POST['class_level'] ?? '');
     $location = trim($_POST['location'] ?? '');
     $experience = trim($_POST['experience'] ?? '');
@@ -69,17 +76,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (empty($error)) {
+        // Update user phone
+        $stmt_user = $pdo->prepare("UPDATE users SET phone = ? WHERE id = ?");
+        $stmt_user->execute([$phone, $tutor_id]);
+
         $stmt = $pdo->prepare("
             UPDATE tutor_profile SET 
-                subject = ?, class_level = ?, location = ?, 
+                subject1 = ?, subject2 = ?, class_level = ?, location = ?, 
                 experience = ?, salary = ?, description = ?, availability = ?, picture = ?
             WHERE user_id = ?
         ");
         
-        if ($stmt->execute([$subject, $class_level, $location, $experience, $salary, $description, $availability, $picture_path, $tutor_id])) {
+        if ($stmt->execute([$subject1, $subject2, $class_level, $location, $experience, $salary, $description, $availability, $picture_path, $tutor_id])) {
             $success = "Profile updated successfully!";
             // Fetch updated profile
-            $stmt = $pdo->prepare("SELECT * FROM tutor_profile WHERE user_id = ?");
+            $stmt = $pdo->prepare("
+                SELECT tp.*, u.phone, u.gender 
+                FROM tutor_profile tp 
+                JOIN users u ON tp.user_id = u.id 
+                WHERE tp.user_id = ?
+            ");
             $stmt->execute([$tutor_id]);
             $profile = $stmt->fetch();
         } else {
@@ -126,15 +142,36 @@ require_once '../includes/header.php';
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Subject</label>
-                            <select name="subject" class="form-select" required>
-                                <option value="">Select Subject</option>
+                            <label class="form-label">Phone Number</label>
+                            <input type="text" name="phone" class="form-control" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Gender</label>
+                            <input type="text" class="form-control bg-light text-muted" value="<?= htmlspecialchars($profile['gender'] ?? 'Not specified') ?>" readonly>
+                            <small class="text-muted" style="font-size: 0.75rem;">Gender cannot be changed after registration.</small>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Primary Subject</label>
+                            <select name="subject1" class="form-select" required>
+                                <option value="">Select Primary Subject</option>
                                 <?php foreach ($subjects as $sub): ?>
-                                    <option value="<?= $sub ?>" <?= ($profile['subject'] ?? '') === $sub ? 'selected' : '' ?>><?= $sub ?></option>
+                                    <option value="<?= $sub ?>" <?= ($profile['subject1'] ?? '') === $sub ? 'selected' : '' ?>><?= $sub ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label">Secondary Subject (Optional)</label>
+                            <select name="subject2" class="form-select">
+                                <option value="">Select Secondary Subject</option>
+                                <?php foreach ($subjects as $sub): ?>
+                                    <option value="<?= $sub ?>" <?= ($profile['subject2'] ?? '') === $sub ? 'selected' : '' ?>><?= $sub ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label">Class Level</label>
                             <select name="class_level" class="form-select" required>
                                 <option value="">Select Class Level</option>

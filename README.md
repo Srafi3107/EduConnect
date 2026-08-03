@@ -1,111 +1,54 @@
-# EduConnect – Home Tutor Finding Platform
+# EduConnect - Home Tutor Finding System
 
-## Overview
+EduConnect is a comprehensive web-based platform designed to bridge the gap between students (or guardians) and qualified home tutors. The system simplifies the process of posting tuition requirements, finding matching tutors, and managing applications.
 
-**EduConnect** is a full-stack web-based platform designed to connect students and parents with qualified home tutors through a secure, transparent, and efficient digital marketplace.
+## 🚀 Features
 
-The platform simplifies the process of finding and hiring tutors by providing a centralized system where students, parents, and tutors can connect directly. It reduces dependence on unreliable word-of-mouth referrals and costly third-party tuition agencies while improving transparency throughout the tutor selection and hiring process.
+### For Students/Guardians
+* **Post Tuition Jobs**: Create detailed requests specifying subject, class level, location, and proposed salary.
+* **Review Applications**: View applications from interested tutors.
+* **Accept/Reject**: Manage applications and select the best fit.
+* **Track Status**: Monitor the status of your posted requests.
 
-EduConnect implements **role-based access control (RBAC)** and provides separate dashboards for **Students/Parents, Tutors, and Administrators**. Each user role has dedicated features and permissions to ensure an organized and secure user experience.
+### For Tutors
+* **Profile Management**: Set your preferences including subject, location, class level, and availability.
+* **Smart Job Board**: Automatically filters and displays only the tuition jobs that perfectly match your profile criteria.
+* **Apply for Jobs**: Send applications with a proposed salary and a custom message.
+* **Job Limit System**: Tutors can have a maximum of 2 active/accepted tuitions at a time to ensure quality education.
 
-## Problem Statement
+### For Administrators
+* **User Management**: View and manage all registered users across the platform.
+* **Request Monitoring**: Oversee all tuition requests, their current status, and who filled them.
 
-Finding qualified home tutors in Bangladesh often involves several challenges, including:
+## 🛠️ Technology Stack
+* **Backend**: PHP (Procedural with PDO for secure database interactions)
+* **Database**: MySQL (Relational database)
+* **Frontend**: HTML5, CSS3 (Custom styles), JavaScript (Vanilla)
+* **UI Framework**: Bootstrap 5 (Responsive design, components), FontAwesome (Icons)
 
-* Unverified tutor profiles and academic information
-* Heavy dependence on social networks, personal contacts, and referrals
-* High commission fees charged by traditional tuition agencies
-* Limited transparency in the tutor selection and hiring process
-* Difficulty comparing tutors based on subjects, qualifications, location, and expected salary
-* Lack of a centralized system for managing tuition requests and their status
+## ⚙️ Installation & Setup
 
-EduConnect addresses these challenges by creating a reliable digital marketplace that enables students and parents to discover suitable tutors, review professional profiles, and manage tutoring requests efficiently.
+1. **Prerequisites**: 
+   * XAMPP/WAMP or any local server stack installed.
+   * PHP 7.4+ and MySQL.
+2. **Clone the Repository**:
+   * Place the `educonnect` folder inside your `htdocs` (XAMPP) or `www` (WAMP) directory.
+3. **Database Setup**:
+   * Open phpMyAdmin (`http://localhost/phpmyadmin`).
+   * Import the `database.sql` file provided in the root directory.
+4. **Configuration**:
+   * Open `config.php` and update the database credentials (port, username, password) if necessary to match your local environment.
+5. **Run the Project**:
+   * Visit `http://localhost/educonnect` in your web browser.
 
-## Key Features
+## 🔒 Security Measures
+* **SQL Injection Prevention**: Uses PHP Data Objects (PDO) with prepared statements for all database queries.
+* **Password Hashing**: Uses PHP's native `password_hash()` and `password_verify()` for secure credential storage.
+* **Role-based Access Control**: Session-based middleware function (`checkRole()`) restricts unauthorized access to specific dashboards.
 
-### Student / Parent Module
+## 📝 Default Credentials
+* **Admin Email**: `admin@hometutor.com`
+* **Admin Password**: `admin123`
 
-* User registration and secure authentication
-* Profile creation and management
-* Search and filter tutors based on:
-
-  * Subject or teaching area
-  * Preferred location
-  * Expected salary or budget
-  * Academic qualifications
-  * Teaching experience
-* View detailed tutor profiles
-* Send tuition requests to selected tutors
-* Track tuition request status
-* View and manage request history
-* Update or cancel pending requests
-* Communicate directly with tutors through the platform
-
-### Tutor Module
-
-* Tutor registration and secure authentication
-* Create and manage a professional tutor profile
-* Add academic qualifications and educational background
-* Add teaching subjects and areas of expertise
-* Include teaching experience and professional information
-* Set expected salary or preferred payment range
-* Specify preferred teaching locations
-* Manage teaching availability
-* Receive tuition requests from students or parents
-* Accept or reject tuition requests
-* View and manage tutoring request history
-* Update profile and availability information
-
-### Admin Module
-
-* Centralized administrative dashboard
-* View platform analytics and activity statistics
-* Manage student, parent, and tutor accounts
-* Review and verify tutor profiles and qualifications
-* Approve or reject tutor verification requests
-* Monitor tuition requests and platform activities
-* Moderate inappropriate or inaccurate content
-* Suspend, reactivate, or delete user accounts
-* Manage reported users and suspicious activities
-* Maintain platform security and system integrity
-
-## Technology Stack
-
-### Frontend
-
-* **JavaScript ** – Used for application logic and client-side functionality
-* **HTML** – Used to structure web pages
-* **CSS** – Used for styling and responsive design
-
-### Backend
-
-PHP
-
-### Database
-
-MySQL
-
-### Development and Testing Tools
-
-* **Git** – Used for version control
-* **GitHub** – Used for source-code management and project collaboration
-=
-
-## Expected Benefits
-
-EduConnect provides a transparent and efficient solution for the home tutoring ecosystem by:
-
-* Making it easier for students and parents to find qualified tutors
-* Allowing tutors to discover relevant teaching opportunities
-* Reducing dependence on informal referrals and tuition agencies
-* Improving transparency in tutor selection
-* Providing verified tutor information
-* Simplifying tuition request management
-* Creating a secure and centralized tutoring marketplace
-* Reducing unnecessary third-party commission costs
-
-## Project Goal
-
-The primary goal of EduConnect is to build a reliable, user-friendly, and scalable digital platform that connects students, parents, and qualified home tutors while making the tutor discovery and hiring process more secure, transparent, and efficient.
-
-
+## 👨‍💻 Author
+Developed as a project to demonstrate full-stack PHP capabilities, secure authentication, and complex relational database queries.

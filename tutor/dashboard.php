@@ -45,6 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['app_action'])) {
             } else {
                 $error = "Failed to reject offer.";
             }
+        } elseif ($action === 'withdraw') {
+            $stmt = $pdo->prepare("DELETE FROM guardian_request_applications WHERE id = ? AND status = 'Pending'");
+            if ($stmt->execute([$app_id])) {
+                $success = "Application withdrawn successfully.";
+            } else {
+                $error = "Failed to withdraw application.";
+            }
         } elseif ($action === 'counter') {
             $counter_salary = trim($_POST['counter_salary'] ?? 0);
             if ($counter_salary <= 0) {
@@ -73,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['app_action'])) {
 $stmt = $pdo->prepare("
     SELECT a.id as app_id, a.proposed_salary, a.message as app_message, a.status as app_status, a.offered_by, a.created_at as applied_at,
            r.subject, r.class_level, r.location, r.additional_address, r.salary as original_budget,
-           u.name as guardian_name, u.email as guardian_email
+           u.name as guardian_name, u.email as guardian_email, u.phone as guardian_phone
     FROM guardian_request_applications a
     JOIN guardian_requests r ON a.request_id = r.id
     JOIN users u ON r.student_id = u.id
@@ -82,6 +89,15 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$tutor_id]);
 $applications = $stmt->fetchAll();
+
+$total_earnings = 0;
+$active_students = [];
+foreach ($applications as $app) {
+    if ($app['app_status'] === 'Accepted') {
+        $total_earnings += $app['proposed_salary'];
+        $active_students[] = $app;
+    }
+}
 
 require_once '../includes/header.php';
 ?>
@@ -98,6 +114,61 @@ require_once '../includes/header.php';
 <?php endif; ?>
 <?php if($error): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card summary-card bg-primary text-white h-100" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-box bg-white text-success me-3">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+                <div>
+                    <h5 class="card-title mb-0">Expected Monthly Earnings</h5>
+                    <h3 class="fw-bold mb-0">BDT <?= number_format($total_earnings, 2) ?></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mt-4 mt-md-0">
+        <div class="card summary-card bg-info text-white h-100" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;">
+            <div class="card-body d-flex align-items-center">
+                <div class="icon-box bg-white text-primary me-3">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <h5 class="card-title mb-0">Active Students</h5>
+                    <h3 class="fw-bold mb-0"><?= count($active_students) ?></h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php if (!empty($active_students)): ?>
+<div class="card shadow-sm mb-5 border-success border-2">
+    <div class="card-body p-4">
+        <h5 class="card-title fw-bold mb-4 text-success"><i class="fa-solid fa-user-graduate me-2"></i>My Active Students & Contacts</h5>
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <?php foreach($active_students as $student): ?>
+                <div class="col">
+                    <div class="border rounded p-3 bg-light">
+                        <h6 class="fw-bold text-dark mb-1"><?= htmlspecialchars($student['guardian_name']) ?></h6>
+                        <p class="mb-1 text-primary fw-bold"><?= htmlspecialchars($student['subject']) ?> (<?= htmlspecialchars($student['class_level']) ?>)</p>
+                        <p class="mb-2 text-muted small"><i class="fa-solid fa-map-marker-alt"></i> <?= htmlspecialchars($student['location']) ?><?= !empty($student['additional_address']) ? ' (' . htmlspecialchars($student['additional_address']) . ')' : '' ?></p>
+                        
+                        <div class="d-flex gap-2">
+                            <a href="mailto:<?= htmlspecialchars($student['guardian_email']) ?>" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-envelope"></i> Email</a>
+                            <?php if(!empty($student['guardian_phone'])): ?>
+                                <a href="tel:<?= htmlspecialchars($student['guardian_phone']) ?>" class="btn btn-sm btn-outline-success"><i class="fa-solid fa-phone"></i> Call</a>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
 <?php endif; ?>
 
 <div class="card shadow-sm">
@@ -186,7 +257,15 @@ require_once '../includes/header.php';
                                     <?php elseif ($app['app_status'] == 'Negotiating' && $app['offered_by'] == 'Tutor'): ?>
                                         <small class="text-muted"><i class="fa-solid fa-clock"></i> Waiting for guardian response (Counter sent)</small>
                                     <?php elseif ($app['app_status'] == 'Pending'): ?>
-                                        <small class="text-muted"><i class="fa-solid fa-clock"></i> Application pending review</small>
+                                        <div class="d-flex flex-column gap-1">
+                                            <small class="text-muted"><i class="fa-solid fa-clock"></i> Application pending review</small>
+                                            <form method="POST" action="" onsubmit="return confirm('Are you sure you want to withdraw this application?');">
+                                                <input type="hidden" name="app_action" value="1">
+                                                <input type="hidden" name="application_id" value="<?= $app['app_id'] ?>">
+                                                <input type="hidden" name="action" value="withdraw">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary w-100"><i class="fa-solid fa-undo"></i> Withdraw Application</button>
+                                            </form>
+                                        </div>
                                     <?php elseif ($app['app_status'] == 'Accepted'): ?>
                                         <span class="text-success"><i class="fa-solid fa-circle-check"></i> Offer Accepted</span>
                                     <?php else: ?>

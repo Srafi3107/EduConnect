@@ -7,10 +7,12 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $gender = $_POST['gender'] ?? '';
     $password = $_POST['password'] ?? '';
     $role = $_POST['role'] ?? '';
 
-    if (empty($name) || empty($email) || empty($password) || empty($role)) {
+    if (empty($name) || empty($email) || empty($phone) || empty($gender) || empty($password) || empty($role)) {
         $error = "All fields are required.";
     } elseif (!in_array($role, ['Tutor', 'Student'])) { // Prevent registering as Admin directly
         $error = "Invalid role selected.";
@@ -21,9 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($stmt->fetch()) {
             $error = "Email already registered.";
         } else {
-            // Store password in plain text
-            $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-            if ($stmt->execute([$name, $email, $password, $role])) {
+            // Store password in plain text (as per existing logic)
+            $stmt = $pdo->prepare("INSERT INTO users (name, email, phone, gender, password, role) VALUES (?, ?, ?, ?, ?, ?)");
+            if ($stmt->execute([$name, $email, $phone, $gender, $password, $role])) {
                 $userId = $pdo->lastInsertId();
                 // If tutor, create empty profile
                 if ($role === 'Tutor') {
@@ -61,6 +63,18 @@ require_once '../includes/header.php';
                     <div class="mb-3">
                         <label class="form-label">Email address</label>
                         <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" name="phone" class="form-control" placeholder="e.g. 017XXXXXXXX" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Gender</label>
+                        <select name="gender" class="form-select" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Password</label>

@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['apply_job'])) {
     $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM guardian_request_applications WHERE tutor_id = ? AND status = 'Accepted'");
     $count_stmt->execute([$tutor_id]);
     if ($count_stmt->fetchColumn() >= 2) {
-        $error = "You cannot send any more applications because you have already reached the maximum limit of 2 active tuitions.";
+        $error = "You cannot send any more applications because you have already reached the maximum limit of 3 active tuitions.";
     } elseif (empty($proposed_salary) || $proposed_salary <= 0) {
         $error = "Please enter a valid proposed salary.";
     } else {
@@ -40,7 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['apply_job'])) {
 }
 
 // Fetch tutor profile first to enforce constraints
-$tutor_stmt = $pdo->prepare("SELECT subject, location, class_level FROM tutor_profile WHERE user_id = ?");
+$tutor_stmt = $pdo->prepare("
+    SELECT tp.subject1, tp.subject2, tp.location, tp.class_level, u.gender 
+    FROM tutor_profile tp 
+    JOIN users u ON tp.user_id = u.id 
+    WHERE tp.user_id = ?
+");
 $tutor_stmt->execute([$tutor_id]);
 $tutor_profile = $tutor_stmt->fetch();
 
@@ -49,7 +54,7 @@ $count_stmt = $pdo->prepare("SELECT COUNT(*) FROM guardian_request_applications 
 $count_stmt->execute([$tutor_id]);
 $accepted_count = $count_stmt->fetchColumn();
 
-if (!$tutor_profile || empty($tutor_profile['subject']) || empty($tutor_profile['location']) || empty($tutor_profile['class_level'])) {
+if (!$tutor_profile || empty($tutor_profile['subject1']) || empty($tutor_profile['location']) || empty($tutor_profile['class_level'])) {
     $profile_incomplete = true;
     $jobs = [];
 } else {
@@ -61,11 +66,21 @@ if (!$tutor_profile || empty($tutor_profile['subject']) || empty($tutor_profile[
         FROM guardian_requests r
         JOIN users u ON r.student_id = u.id
         LEFT JOIN guardian_request_applications a ON r.id = a.request_id AND a.tutor_id = ?
-        WHERE r.subject = ? AND r.location = ? AND r.class_level = ?
+        WHERE (r.subject = ? OR (r.subject = ? AND ? != '')) 
+        AND r.location = ? AND r.class_level = ?
+        AND (r.gender_preference = 'Any' OR r.gender_preference = ?)
         AND (r.id NOT IN (SELECT request_id FROM guardian_request_applications WHERE status = 'Accepted') OR a.status = 'Accepted')
         ORDER BY r.created_at DESC
     ");
-    $stmt->execute([$tutor_id, $tutor_profile['subject'], $tutor_profile['location'], $tutor_profile['class_level']]);
+    $stmt->execute([
+        $tutor_id, 
+        $tutor_profile['subject1'], 
+        $tutor_profile['subject2'] ?? '', 
+        $tutor_profile['subject2'] ?? '', 
+        $tutor_profile['location'], 
+        $tutor_profile['class_level'],
+        $tutor_profile['gender'] ?? ''
+    ]);
     $jobs = $stmt->fetchAll();
 }
 
@@ -126,6 +141,7 @@ require_once '../includes/header.php';
                                             <span class="me-3"><i class="fa-solid fa-user text-muted"></i> Guardian: <strong><?= htmlspecialchars($job['guardian_name']) ?></strong></span>
                                             <span class="me-3"><i class="fa-solid fa-graduation-cap text-muted"></i> Class: <strong><?= htmlspecialchars($job['class_level']) ?></strong></span>
                                             <span class="me-3"><i class="fa-solid fa-map-marker-alt text-muted"></i> Location: <strong><?= htmlspecialchars($job['location']) ?></strong><?= !empty($job['additional_address']) ? ' (' . htmlspecialchars($job['additional_address']) . ')' : '' ?></span>
+                                            <span class="me-3"><i class="fa-solid fa-venus-mars text-muted"></i> Prefers: <strong><?= htmlspecialchars($job['gender_preference'] ?? 'Any') ?></strong></span>
                                             <span><i class="fa-solid fa-money-bill-wave text-muted"></i> Budget: <strong>BDT <?= htmlspecialchars(number_format($job['salary'], 2)) ?>/month</strong></span>
                                         </p>
                                         <?php if ($job['description']): ?>

@@ -3,7 +3,7 @@ require_once 'config.php';
 
 // Fetch a few available tutors to show on the landing page
 $stmt = $pdo->query("
-    SELECT u.id as user_id, u.name, tp.subject, tp.location, tp.picture
+    SELECT u.id as user_id, u.name, tp.subject1, tp.subject2, tp.location, tp.picture
     FROM users u
     JOIN tutor_profile tp ON u.id = tp.user_id
     WHERE u.role = 'Tutor' AND tp.availability = 'Available'
@@ -87,7 +87,11 @@ require_once 'includes/header.php';
                             ?>
                             <img src="<?= $tutor_pic ?>" alt="Avatar" class="tutor-avatar mb-3" onerror="this.src='https://ui-avatars.com/api/?name=<?= urlencode($tutor['name']) ?>&background=random'">
                             <h5 class="card-title fw-bold"><?= htmlspecialchars($tutor['name']) ?></h5>
-                            <p class="card-text text-muted mb-1"><i class="fa-solid fa-book text-primary"></i> <?= htmlspecialchars($tutor['subject'] ?: 'Subject not specified') ?></p>
+                            <p class="card-text text-muted mb-1">
+                                <i class="fa-solid fa-book text-primary"></i> 
+                                <?= htmlspecialchars($tutor['subject1'] ?: 'Subject not specified') ?>
+                                <?= !empty($tutor['subject2']) ? ' & ' . htmlspecialchars($tutor['subject2']) : '' ?>
+                            </p>
                             <p class="card-text text-muted mb-3"><i class="fa-solid fa-map-marker-alt text-danger"></i> <?= htmlspecialchars($tutor['location'] ?: 'Location not specified') ?></p>
                             <?php if(isLoggedIn() && $_SESSION['role'] === 'Student'): ?>
                                 <a href="/EduConnect/student/view_tutor.php?id=<?= $tutor['user_id'] ?>" class="btn btn-outline-primary w-100 mt-auto">View Profile</a>
