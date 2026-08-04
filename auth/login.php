@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Cookie: If "Remember Me" is checked, save email & password cookies for 30 days
             if ($remember_me) {
                 setcookie('remember_email', $email, time() + (30 * 24 * 60 * 60), '/EduConnect/');       // 30 days
-                setcookie('remember_password', $password, time() + (30 * 24 * 60 * 60), '/EduConnect/'); // 30 days
+                setcookie('remember_password', $password, time() + (7 * 24 * 60 * 60), '/EduConnect/'); // 9 days
             } else {
                 // If not checked, clear any existing cookies
                 setcookie('remember_email', '', time() - 3600, '/EduConnect/');
